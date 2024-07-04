@@ -17,7 +17,9 @@ LPCONFIG = {
 	FPLATE = false, 
 	HPLATE = false, 
 	RIGHT = true, 
-	ZG = 1, 
+	ZG = 1,
+	DM = 1,
+	VPlus = 1,
 	DUEL = false, 
 	NOSAVE = false, 
 	GREEN = 2, 
@@ -141,7 +143,7 @@ local LazyPigMenuStrings = {
 		[55]= "Block BG Quest Sharing",
 		
 		[60]= "Always",
-		[61]= "Warrior Shield/Druid Bear",
+		[61]= "Shield User or Druid Bear",
 		
 		[70]= "Players' Spam",
 		[71]= "Uncommon Roll",
@@ -160,7 +162,13 @@ local LazyPigMenuStrings = {
 		[98]= "Gossip Auto Processing",
 		[99]= "Character Auto-Save",
 		[100]= "Auto Dismount",
-		[101]= "Chat Spam Filter"
+		[101]= "Chat Spam Filter",
+		[110]= "Need",
+		[111]= "Greed",
+		[112]= "Pass",
+		[120]= "Need",
+		[121]= "Greed",
+		[122]= "Pass"
 }
 
 function LazyPig_OnLoad()
@@ -527,6 +535,8 @@ function LazyPig_OnEvent(event)
 			
 	elseif(event == "START_LOOT_ROLL") then
 		LazyPig_ZGRoll(arg1)
+		LazyPig_DMRoll(arg1)
+		LazyPig_VPlusRoll(arg1)
 	
 	elseif(event == "CHAT_MSG_LOOT") then
 		if (string.find(arg1 ,"You won") or string.find(arg1 ,"You receive")) and (string.find(arg1 ,"cffa335e") or string.find(arg1, "cff0070d") or string.find(arg1, "cffff840")) and not string.find(arg1 ,"Bijou") and not string.find(arg1 ,"Idol") and not string.find(arg1 ,"Shard") then
@@ -942,6 +952,52 @@ function LazyPig_ZGRoll(id)
 		local _, name, _, quality = GetLootRollItemInfo(id);
 		if string.find(name ,"Hakkari Bijou") or string.find(name ,"Coin") then
 			RollOnLoot(id, LPCONFIG.ZG);
+			local _, _, _, hex = GetItemQualityColor(quality)
+			DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Auto "..hex..RollReturn().." "..GetLootRollItemLink(id))
+			return
+		end	
+	end	
+end
+
+function LazyPig_DMRoll(id)
+	RollReturn = function()
+		local txt = ""
+		if LPCONFIG.DM == 1 then
+			txt = "NEED"
+		elseif LPCONFIG.DM == 2 then
+			txt = "GREED"
+		elseif LPCONFIG.DM == 0 then
+			txt = "PASS"
+		end
+		return txt
+	end
+	if LPCONFIG.DM then	
+		local _, name, _, quality = GetLootRollItemInfo(id);
+		if string.find(name ,"Parchment Page") or string.find(name ,"Old Heavy Folio") then
+			RollOnLoot(id, LPCONFIG.DM);
+			local _, _, _, hex = GetItemQualityColor(quality)
+			DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Auto "..hex..RollReturn().." "..GetLootRollItemLink(id))
+			return
+		end	
+	end	
+end
+
+function LazyPig_VPlusRoll(id)
+	RollReturn = function()
+		local txt = ""
+		if LPCONFIG.VPlus == 1 then
+			txt = "NEED"
+		elseif LPCONFIG.VPlus == 2 then
+			txt = "GREED"
+		elseif LPCONFIG.VPlus == 0 then
+			txt = "PASS"
+		end
+		return txt
+	end
+	if LPCONFIG.VPlus then	
+		local _, name, _, quality = GetLootRollItemInfo(id);
+		if string.find(name ,"Dragonbreath") or string.find(name ,"Livingstone") then
+			RollOnLoot(id, LPCONFIG.VPlus);
 			local _, _, _, hex = GetItemQualityColor(quality)
 			DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Auto "..hex..RollReturn().." "..GetLootRollItemLink(id))
 			return
@@ -1748,6 +1804,14 @@ function LazyPig_GetOption(num)
 	or num == 100 and LPCONFIG.DISMOUNT
 	or num == 101 and LPCONFIG.SPAM
 	
+	or num == 110 and LPCONFIG.DM == 1
+	or num == 111 and LPCONFIG.DM == 2
+	or num == 112 and LPCONFIG.DM == 0
+	
+	or num == 120 and LPCONFIG.VPlus == 1
+	or num == 121 and LPCONFIG.VPlus == 2
+	or num == 122 and LPCONFIG.VPlus == 0
+	
 	or nil then
 		this:SetChecked(true);
 	else
@@ -1944,8 +2008,39 @@ function LazyPig_SetOption(num)
 		if not checked then LPCONFIG.DISMOUNT = nil end	
 	elseif num == 101 then
 		LPCONFIG.SPAM  = true
-		if not checked then LPCONFIG.SPAM  = nil end			
+		if not checked then LPCONFIG.SPAM  = nil end	
 		
+	elseif num == 110 then 
+		LPCONFIG.DM = 1
+		if not checked then LPCONFIG.DM = nil end
+		LazyPigMenuObjects[111]:SetChecked(nil)
+		LazyPigMenuObjects[112]:SetChecked(nil)
+	elseif num == 111 then 
+		LPCONFIG.DM = 2
+		if not checked then LPCONFIG.DM = nil end
+		LazyPigMenuObjects[110]:SetChecked(nil)
+		LazyPigMenuObjects[112]:SetChecked(nil)
+	elseif num == 112 then 
+		LPCONFIG.DM = 0 
+		if not checked then LPCONFIG.DM = nil end
+		LazyPigMenuObjects[110]:SetChecked(nil)
+		LazyPigMenuObjects[111]:SetChecked(nil)		
+	
+	elseif num == 120 then 
+		LPCONFIG.VPlus = 1
+		if not checked then LPCONFIG.VPlus = nil end
+		LazyPigMenuObjects[121]:SetChecked(nil)
+		LazyPigMenuObjects[122]:SetChecked(nil)
+	elseif num == 121 then 
+		LPCONFIG.VPlus = 2
+		if not checked then LPCONFIG.VPlus = nil end
+		LazyPigMenuObjects[120]:SetChecked(nil)
+		LazyPigMenuObjects[122]:SetChecked(nil)
+	elseif num == 122 then 
+		LPCONFIG.VPlus = 0 
+		if not checked then LPCONFIG.VPlus = nil end
+		LazyPigMenuObjects[120]:SetChecked(nil)
+		LazyPigMenuObjects[121]:SetChecked(nil)		
 	else
 		--DEFAULT_CHAT_FRAME:AddMessage("DEBUG: No num assigned - "..num)
 	end
@@ -2086,9 +2181,15 @@ function LazyPig_CancelSalvationBuff()
 end
 
 function LazyPig_CheckSalvation()
-	if(LPCONFIG.SALVA == 1 or LPCONFIG.SALVA == 2 and (LazyPig_IsShieldEquipped() and LazyPig_PlayerClass("Warrior", "player") or LazyPig_IsBearForm())) then
+	if(LPCONFIG.SALVA == 1 or LPCONFIG.SALVA == 2 and (LazyPig_IsShieldEquipped() and (LazyPig_PlayerClass("Warrior", "player") or LazyPig_PlayerClass("Shaman", "player")) or LazyPig_IsBearForm())) then
 		LazyPig_CancelSalvationBuff()
 	end
+end
+
+function LazyPig_CheckSalvation()
+    if(LPCONFIG.SALVA == 1 or LPCONFIG.SALVA == 2 and (LazyPig_IsShieldEquipped() and (LazyPig_PlayerClass("Warrior", "player") or LazyPig_PlayerClass("Shaman", "player") or LazyPig_PlayerClass("Paladin", "player"))) or LazyPig_IsBearForm()) then
+        LazyPig_CancelSalvationBuff()
+    end
 end
 
 function LazyPig_ShowBindings(bind, fs, desc)
@@ -2115,6 +2216,10 @@ function LazyPig_ChatFrame_OnEvent(event)
 	if event == "CHAT_MSG_LOOT" or event == "CHAT_MSG_MONEY" then
 		local bijou = string.find(arg1 ,"Bijou")
 		local coin = string.find(arg1 ,"Coin")
+		local page = string.find(arg1, "Parchment Page")
+		local folio = string.find(arg1, "Old Heavy Folio")
+		local dragonbreath = string.find(arg1, "Dragonbreath")
+		local livingstone = string.find(arg1, "Livingstone")
 		
 		local green_roll = greenrolltime > GetTime()
 		local check_uncommon = LPCONFIG.SPAM_UNCOMMON and string.find(arg1 ,"1eff00")
@@ -2125,7 +2230,9 @@ function LazyPig_ChatFrame_OnEvent(event)
 		local check1 = string.find(arg1 ,"You")
 		local check2 = string.find(arg1 ,"won") or string.find(arg1 ,"receive")
 		local check3 = LPCONFIG.ZG and (bijou or coin)
-		local check4 = check1 and not check3 and not green_roll or check2 
+		local check5 = LPCONFIG.DM and (page or folio)
+		local check6 = LPCONFIG.VPlus and (dragonbreath or livingstone)
+		local check4 = check1 and not check3 and not check5 and not check6 and not green_roll or check2 
 
 		if not check4 and (check_uncommon or check_rare) or check_loot and not check1 or check_money then
 			return
