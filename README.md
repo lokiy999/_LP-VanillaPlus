@@ -1,4 +1,4 @@
-#_LazyPig Wow 1.12.1 
+#_LazyPig Wow 1.12.1 VanillaPlus Edition
 
 This mod is mostly for lazy people.
 Some of the addon's functions may not work if you're using not en/us localized client.
@@ -7,7 +7,7 @@ To open configuration menu type /lp
 Addons with similar functionality you don't need anymore
 - Auto Profit
 - Ez Dismount
-- Automaton
+- Automation
 - Quick Loot
 - Block Salvation
 
